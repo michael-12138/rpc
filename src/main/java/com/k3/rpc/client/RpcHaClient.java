@@ -10,6 +10,7 @@ import java.io.IOException;
  * Author : Michael.
  */
 public class RpcHaClient implements RpcClient {
+
     @Override
     public RpcResponse request(RpcRequest request) throws IOException {
         return null;
