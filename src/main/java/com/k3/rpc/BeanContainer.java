@@ -33,6 +33,7 @@ public class BeanContainer {
     }
 
     private void scanAnnotation(String pkg) {
+        logger.info("Scanning path [ {} ] RpcService annotation...", pkg);
         try {
             Reflections reflections = new Reflections(pkg);
             Set<Class<?>> classes = reflections.getTypesAnnotatedWith(RpcService.class);

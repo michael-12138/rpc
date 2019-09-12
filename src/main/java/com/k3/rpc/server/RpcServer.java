@@ -67,8 +67,8 @@ public class RpcServer implements LifeCycle {
         int socketSendBuffSize = conf.getInt("rpc.netty.socket.send.buffer.size", 8192);
         int socketTimeout = conf.getInt("rpc.netty.socket.timeout", 10 * 1000);
 
-        final int readTimeout = conf.getInt("rpc.netty.socket.read.timeout.sec", 5);
-        final int writeTimeout = conf.getInt("rpc.netty.socket.write.timeout.sec", 5);
+        final int readTimeout = conf.getInt("rpc.netty.socket.read.timeout", 5 * 1000);
+        final int writeTimeout = conf.getInt("rpc.netty.socket.write.timeout", 5 * 1000);
 
         this.bossGroup = new NioEventLoopGroup(bossThreads);
         this.workerGroup = new NioEventLoopGroup(workerThreads);
@@ -86,8 +86,8 @@ public class RpcServer implements LifeCycle {
         this.bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
             @Override
             protected void initChannel(SocketChannel ch) throws Exception {
-                ch.pipeline().addLast("read-timeout", new ReadTimeoutHandler(readTimeout));
-                ch.pipeline().addLast("write-timeout", new WriteTimeoutHandler(writeTimeout));
+                ch.pipeline().addLast("read-timeout", new ReadTimeoutHandler(readTimeout, TimeUnit.MILLISECONDS));
+                ch.pipeline().addLast("write-timeout", new WriteTimeoutHandler(writeTimeout, TimeUnit.MILLISECONDS));
                 ch.pipeline().addLast("rpc-decoder", new RpcDecoder(RpcRequest.class));
                 ch.pipeline().addLast("rpc-encoder", new RpcEncoder(RpcResponse.class));
                 ch.pipeline().addLast("rpc-handler", new RpcServerHandler(serviceBeans));

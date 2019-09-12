@@ -38,7 +38,7 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<RpcRequest> {
         } catch (Throwable t) {
             response.setError(t);
         }
-        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
     }
 
     private Object handle(RpcRequest request) throws Throwable {

@@ -2,14 +2,17 @@ package com.k3.rpc;
 
 import com.k3.rpc.client.RpcClient;
 import com.k3.rpc.client.SimpleRpcClient;
+import com.k3.rpc.client.SimpleRpcClientPool;
 import com.k3.rpc.common.Node;
 import com.k3.rpc.registry.ServerDiscovery;
 import com.k3.rpc.registry.ServerRegistry;
 import org.junit.Test;
+import org.k3.common.Configuration;
 import org.k3.common.utils.IOUtil;
 import org.k3.common.utils.SystemUtil;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -46,12 +49,15 @@ public class JVMTest {
         ServerDiscovery serverDiscovery = new ServerDiscovery(registryAddress, registryPath, 3000);
         List<Node> nodes = serverDiscovery.nodeList();
         Node node = nodes.get(0);
-        SimpleRpcClient rpcClient = new SimpleRpcClient(node, 5000);
+        RpcClient rpcClient = new SimpleRpcClientPool(1, node, Configuration.createConfiguration(Collections.emptyMap()));
         try {
-            rpcClient.connect(5000);
             String ping = rpcClient.ping();
 
             System.out.println(ping);
+
+            String ping1 = rpcClient.ping();
+
+            System.out.println(ping1);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Throwable throwable) {

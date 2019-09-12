@@ -12,10 +12,8 @@ import java.io.IOException;
  */
 public interface RpcClient extends Closeable {
 
-    public RpcProxy getRpcProxy();
+    public RpcResponse request(RpcRequest request) throws IOException;
 
-    public RpcResponse request(RpcRequest request) throws Throwable;
-
-    public String ping() throws Throwable;
+    public String ping() throws IOException;
 
 }

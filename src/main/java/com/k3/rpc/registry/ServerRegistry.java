@@ -21,7 +21,7 @@ public class ServerRegistry {
     private final CountDownLatch isConnected = new CountDownLatch(1);
 
     public ServerRegistry(String regAddress, String regPath) {
-        this(regAddress, regPath, 10000);
+        this(regAddress, regPath, 10 * 1000);
     }
 
     public ServerRegistry(String regAddress, String regPath, int zkSessionTimeout) {

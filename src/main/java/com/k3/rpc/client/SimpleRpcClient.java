@@ -10,11 +10,16 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.handler.timeout.WriteTimeoutHandler;
+import org.k3.common.Configuration;
 import org.k3.common.utils.IOUtil;
+import org.k3.common.utils.ShortUuid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -33,15 +38,16 @@ public class SimpleRpcClient implements RpcClient {
     private ChannelFuture channelFuture;
 
     private final RpcClientHandler clientHandler;
-    private final RpcProxy rpcProxy;
 
-    public SimpleRpcClient(Node node, int socketTimeout) {
+    private long lastCheckValidTime;
+
+    public SimpleRpcClient(Node node, Configuration conf, int socketTimeout) {
         this.node = node;
         this.socketTimeout = socketTimeout;
         this.clientHandler = new RpcClientHandler();
         this.worker = new NioEventLoopGroup();
         this.bootstrap = new Bootstrap();
-        this.rpcProxy = new RpcProxy(this);
+        this.lastCheckValidTime = System.currentTimeMillis();
     }
 
     public void connect(int timeout) throws IOException {
@@ -56,6 +62,8 @@ public class SimpleRpcClient implements RpcClient {
             this.bootstrap.handler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 protected void initChannel(SocketChannel ch) throws Exception {
+                    ch.pipeline().addLast("read-timeout", new ReadTimeoutHandler(socketTimeout, TimeUnit.MILLISECONDS));
+                    ch.pipeline().addLast("write-timeout", new WriteTimeoutHandler(socketTimeout, TimeUnit.MILLISECONDS));
                     ch.pipeline().addLast("rpc-encoder", new RpcEncoder(RpcRequest.class));
                     ch.pipeline().addLast("rpc-decoder", new RpcDecoder(RpcResponse.class));
                     ch.pipeline().addLast("rpc-handler", SimpleRpcClient.this.clientHandler);
@@ -73,28 +81,34 @@ public class SimpleRpcClient implements RpcClient {
     }
 
     @Override
-    public RpcProxy getRpcProxy() {
-        return this.rpcProxy;
-    }
-
-    @Override
-    public RpcResponse request(RpcRequest request) throws Throwable {
+    public RpcResponse request(RpcRequest request) throws IOException {
         clientHandler.lock.lock();
         try {
             channelFuture.channel().writeAndFlush(request).sync();
-            clientHandler.arrived.await(socketTimeout, TimeUnit.MILLISECONDS);
+            clientHandler.arrived.await();
             return clientHandler.getResponse();
         } catch (InterruptedException e) {
-            throw new IOException(String.format("Request failed: [%s]. [%s].", node.toString(), request.toString()), e);
+            throw new IOException(String.format("Request failed: %s, %s.", node.toString(), request.toString()));
         } finally {
             clientHandler.lock.unlock();
         }
     }
 
     @Override
-    public String ping() throws Throwable {
-        BasicService basicService = this.rpcProxy.create(BasicService.class);
-        return basicService.ping();
+    public String ping() throws IOException {
+        RpcRequest request = new RpcRequest();
+        request.setRequestId(ShortUuid.newShortUuid());
+        request.setClassName(BasicService.class.getName());
+        request.setMethodName("ping");
+        request.setParameterTypes(null);
+        request.setParameters(null);
+
+        RpcResponse response = this.request(request);
+        if (response.isError()) {
+            throw new IOException(response.getError());
+        } else {
+            return String.valueOf(response.getResult());
+        }
     }
 
     @Override
@@ -110,5 +124,14 @@ public class SimpleRpcClient implements RpcClient {
         } else {
             this.worker.shutdownGracefully();
         }
+    }
+
+    public boolean needCheckValid(long now) {
+        long gap = now - lastCheckValidTime;
+        if (gap < 5000) {
+            return false;
+        }
+        lastCheckValidTime = now;
+        return true;
     }
 }

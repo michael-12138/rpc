@@ -30,7 +30,7 @@ public class ServerDiscovery {
     private final CountDownLatch isConnected = new CountDownLatch(1);
 
     public ServerDiscovery(String regAddress, String regPath) {
-        this(regAddress, regPath, 10000);
+        this(regAddress, regPath, 10 * 1000);
     }
 
     public ServerDiscovery(String regAddress, String regPath, int zkSessionTimeout) {
