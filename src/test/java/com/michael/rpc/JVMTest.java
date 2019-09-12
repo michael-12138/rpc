@@ -1,11 +1,10 @@
-package com.k3.rpc;
+package com.michael.rpc;
 
-import com.k3.rpc.client.RpcClient;
-import com.k3.rpc.client.SimpleRpcClient;
-import com.k3.rpc.client.SimpleRpcClientPool;
-import com.k3.rpc.common.Node;
-import com.k3.rpc.registry.ServerDiscovery;
-import com.k3.rpc.registry.ServerRegistry;
+import com.michael.rpc.client.RpcClient;
+import com.michael.rpc.client.SimpleRpcClientPool;
+import com.michael.rpc.common.Node;
+import com.michael.rpc.registry.ServerDiscovery;
+import com.michael.rpc.registry.ServerRegistry;
 import org.junit.Test;
 import org.k3.common.Configuration;
 import org.k3.common.utils.IOUtil;

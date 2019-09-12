@@ -1,4 +1,4 @@
-package com.k3.rpc.registry;
+package com.michael.rpc.registry;
 
 import org.apache.zookeeper.*;
 import org.k3.common.Constants;

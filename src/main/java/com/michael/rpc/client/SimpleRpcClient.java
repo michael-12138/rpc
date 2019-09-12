@@ -1,7 +1,7 @@
-package com.k3.rpc.client;
+package com.michael.rpc.client;
 
-import com.k3.rpc.common.*;
-import com.k3.rpc.service.BasicService;
+import com.michael.rpc.common.*;
+import com.michael.rpc.service.BasicService;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 
 /**

@@ -1,7 +1,7 @@
-package com.k3.rpc.server;
+package com.michael.rpc.server;
 
-import com.k3.rpc.common.RpcRequest;
-import com.k3.rpc.common.RpcResponse;
+import com.michael.rpc.common.RpcRequest;
+import com.michael.rpc.common.RpcResponse;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;

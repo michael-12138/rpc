@@ -1,11 +1,11 @@
-package com.k3.rpc.server;
+package com.michael.rpc.server;
 
-import com.k3.rpc.BeanContainer;
-import com.k3.rpc.common.RpcDecoder;
-import com.k3.rpc.common.RpcEncoder;
-import com.k3.rpc.common.RpcRequest;
-import com.k3.rpc.common.RpcResponse;
-import com.k3.rpc.registry.ServerRegistry;
+import com.michael.rpc.BeanContainer;
+import com.michael.rpc.common.RpcDecoder;
+import com.michael.rpc.common.RpcEncoder;
+import com.michael.rpc.common.RpcRequest;
+import com.michael.rpc.common.RpcResponse;
+import com.michael.rpc.registry.ServerRegistry;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;

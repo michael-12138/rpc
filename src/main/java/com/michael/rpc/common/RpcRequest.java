@@ -1,4 +1,4 @@
-package com.k3.rpc.common;
+package com.michael.rpc.common;
 
 import java.util.Arrays;
 

@@ -1,4 +1,4 @@
-package com.k3.rpc.common;
+package com.michael.rpc.common;
 
 import com.dyuproject.protostuff.LinkedBuffer;
 import com.dyuproject.protostuff.ProtostuffIOUtil;

@@ -1,6 +1,6 @@
-package com.k3.rpc.service;
+package com.michael.rpc.service;
 
-import com.k3.rpc.RpcService;
+import com.michael.rpc.RpcService;
 
 /**
  * Created on 2019-09-10 10:52
