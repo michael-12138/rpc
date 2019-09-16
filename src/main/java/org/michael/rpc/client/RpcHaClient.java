@@ -11,6 +11,7 @@ import java.io.IOException;
  */
 public class RpcHaClient implements RpcClient {
 
+
     @Override
     public RpcResponse request(RpcRequest request) throws IOException {
         return null;
