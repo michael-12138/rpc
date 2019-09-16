@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.michael.rpc</groupId>
+    <groupId>org.michael.rpc</groupId>
     <artifactId>rpc</artifactId>
     <version>1.0.0</version>
 
@@ -25,7 +25,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.11</version>
+            <version>RELEASE</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -64,8 +64,8 @@
             <version>3.0.1</version>
         </dependency>
         <dependency>
-            <groupId>org.k3</groupId>
-            <artifactId>k3-common</artifactId>
+            <groupId>org.michael.common</groupId>
+            <artifactId>common</artifactId>
             <version>1.0.0</version>
         </dependency>
     </dependencies>
