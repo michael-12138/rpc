@@ -61,8 +61,8 @@ public class SimpleRpcClient implements RpcClient {
             this.bootstrap.handler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 protected void initChannel(SocketChannel ch) throws Exception {
-                    ch.pipeline().addLast("read-timeout", new ReadTimeoutHandler(socketTimeout, TimeUnit.MILLISECONDS));
-                    ch.pipeline().addLast("write-timeout", new WriteTimeoutHandler(socketTimeout, TimeUnit.MILLISECONDS));
+//                    ch.pipeline().addLast("read-timeout", new ReadTimeoutHandler(socketTimeout, TimeUnit.MILLISECONDS));
+//                    ch.pipeline().addLast("write-timeout", new WriteTimeoutHandler(socketTimeout, TimeUnit.MILLISECONDS));
                     ch.pipeline().addLast("rpc-encoder", new RpcEncoder(RpcRequest.class));
                     ch.pipeline().addLast("rpc-decoder", new RpcDecoder(RpcResponse.class));
                     ch.pipeline().addLast("rpc-handler", SimpleRpcClient.this.clientHandler);
@@ -81,15 +81,11 @@ public class SimpleRpcClient implements RpcClient {
 
     @Override
     public RpcResponse request(RpcRequest request) throws IOException {
-        clientHandler.lock.lock();
         try {
             channelFuture.channel().writeAndFlush(request).sync();
-            clientHandler.arrived.await();
-            return clientHandler.getResponse();
-        } catch (InterruptedException e) {
-            throw new IOException(String.format("Request failed: %s, %s.", node.toString(), request.toString()));
-        } finally {
-            clientHandler.lock.unlock();
+            return clientHandler.waitResponse(socketTimeout);
+        } catch (Exception e) {
+            throw new IOException(String.format("Request failed: %s, %s.", node.toString(), request.toString()), e);
         }
     }
 

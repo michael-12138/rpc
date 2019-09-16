@@ -8,7 +8,9 @@ import io.netty.handler.timeout.WriteTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -32,16 +34,25 @@ public class RpcClientHandler extends SimpleChannelInboundHandler<RpcResponse> {
         this.response = new AtomicReference<>(null);
     }
 
-    public RpcResponse getResponse() {
-        return this.response.get();
+    public RpcResponse waitResponse(long timeout) throws IOException {
+        lock.lock();
+        try {
+            arrived.await(timeout, TimeUnit.MILLISECONDS);
+            RpcResponse resp = this.response.get();
+            if (resp == null) {
+                throw new IOException(String.format("Wait response timeout %d ms.", timeout));
+            }
+            return resp;
+        } catch (InterruptedException e) {
+            throw new IOException("Wait response interrupted.", e);
+        } finally {
+            this.response.set(null);
+            lock.unlock();
+        }
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcResponse response) throws Exception {
-        handle(response);
-    }
-
-    private void handle(RpcResponse response) {
         lock.lock();
         try {
             this.response.set(response);
@@ -64,9 +75,6 @@ public class RpcClientHandler extends SimpleChannelInboundHandler<RpcResponse> {
         } else {
             super.exceptionCaught(ctx, cause);
         }
-        RpcResponse response = new RpcResponse();
-        response.setError(cause);
-        handle(response);
     }
 
     private String clientIp(final ChannelHandlerContext ctx) {
