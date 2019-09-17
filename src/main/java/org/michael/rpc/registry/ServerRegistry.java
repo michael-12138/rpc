@@ -20,10 +20,6 @@ public class ServerRegistry {
     private final int zkSessionTimeout;
     private final CountDownLatch isConnected = new CountDownLatch(1);
 
-    public ServerRegistry(String regAddress, String regPath) {
-        this(regAddress, regPath, 10 * 1000);
-    }
-
     public ServerRegistry(String regAddress, String regPath, int zkSessionTimeout) {
         this.regAddress = regAddress;
         this.regPath = regPath;

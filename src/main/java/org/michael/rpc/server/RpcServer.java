@@ -180,9 +180,9 @@ public class RpcServer implements LifeCycle {
         String instance = parameters.getString("i");
         Configuration conf = Configuration.fromFile(configFile);
 
-        String regAddr = conf.getString("rpc.server.registry.addr", null);
-        String regPath = conf.getString("rpc.server.registry.path", "/rpc");
-        int zkSessionTimeout = conf.getInt("rpc.server.registry.zk.session.timeout.ms", 10 * 1000);
+        String regAddr = conf.getString("rpc.registery.zookeeper.address", null);
+        String regPath = conf.getString("rpc.registery.zookeeper.path", "/rpc");
+        int zkSessionTimeout = conf.getInt("rpc.registry.zookeeper.session.timeout.ms", 10 * 1000);
         ServerRegistry serverRegistry = null;
         if (regAddr != null) {
             serverRegistry = new ServerRegistry(regAddr, regPath, zkSessionTimeout);

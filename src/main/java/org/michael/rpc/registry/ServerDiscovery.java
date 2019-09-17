@@ -1,5 +1,6 @@
 package org.michael.rpc.registry;
 
+import org.apache.zookeeper.KeeperException;
 import org.michael.rpc.common.Node;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.WatchedEvent;
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
@@ -27,6 +29,7 @@ public class ServerDiscovery {
     private final String regPath;
     private final int zkSessionTimeout;
     private final AtomicReference<List<Node>> latestNodeList;
+    private final List<ServerDiscoveryListener> listeners = new LinkedList<>();
     private final CountDownLatch isConnected = new CountDownLatch(1);
 
     public ServerDiscovery(String regAddress, String regPath) {
@@ -46,6 +49,24 @@ public class ServerDiscovery {
             throw new RuntimeException("ServerDiscovery initialize failed.");
         }
 
+    }
+
+    private void onServerNodeChange() {
+        synchronized (listeners) {
+            for (ServerDiscoveryListener listener : listeners) {
+                listener.onServerNodeChange(this);
+            }
+            printServerList();
+        }
+    }
+
+    public void addListener(ServerDiscoveryListener listener) {
+        if (listener == null) {
+            return;
+        }
+        synchronized (listeners) {
+            listeners.add(listener);
+        }
     }
 
     public List<Node> nodeList() {
@@ -86,28 +107,33 @@ public class ServerDiscovery {
                 }
             });
 
-            List<Node> nodeList = new ArrayList<>(4);
-            for (String node : children) {
-                byte[] bytes = zk.getData(regPath + "/" + node, false, null);
-                String s = new String(bytes, Constants.UTF8);
-                String[] kv = StringUtils.split(s, ":");
-                if (kv == null || kv.length != 2) {
-                    continue;
-                }
-                String host = kv[0];
-                Integer port = StringUtil.toInt(kv[1]);
-                if (StringUtils.isBlank(host) || port == null) {
-                    continue;
-                }
-                host = host.trim();
-                nodeList.add(new Node(host, port));
-            }
+            List<Node> nodeList = getNodes(zk, children);
             latestNodeList.set(nodeList);
-            printServerList();
+            onServerNodeChange();
         } catch (Exception e) {
             logger.error("Get zookeeper children [ " + regPath + " ] failed.");
             throw e;
         }
+    }
+
+    private List<Node> getNodes(ZooKeeper zk, List<String> children) throws KeeperException, InterruptedException {
+        List<Node> nodeList = new ArrayList<>(4);
+        for (String node : children) {
+            byte[] bytes = zk.getData(regPath + "/" + node, false, null);
+            String s = new String(bytes, Constants.UTF8);
+            String[] kv = StringUtils.split(s, ":");
+            if (kv == null || kv.length != 2) {
+                continue;
+            }
+            String host = kv[0];
+            Integer port = StringUtil.toInt(kv[1]);
+            if (StringUtils.isBlank(host) || port == null) {
+                continue;
+            }
+            host = host.trim();
+            nodeList.add(new Node(host, port));
+        }
+        return nodeList;
     }
 
     private void printServerList() {
@@ -119,6 +145,6 @@ public class ServerDiscovery {
         if (builder.length() > 0) {
             builder.setLength(builder.length() - 1);
         }
-        logger.info("Available node list changes: [ {} ]", builder);
+        logger.info("Latest available node list [ {} ]", builder);
     }
 }
